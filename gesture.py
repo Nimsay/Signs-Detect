@@ -67,5 +67,3 @@ while(cap.isOpened()):
     k = cv2.waitKey(10)
     if k == 27:
         break
-
-    #tetetettetetettetetetthhh
