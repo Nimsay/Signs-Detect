@@ -1,6 +1,32 @@
 import cv2
 import numpy as np
 import math
+
+# Trouve le centre d'un rectangle
+def rect_center(l,t,r,b):
+    width = r - l
+    height = b - t
+    center_x = l + width/2
+    center_y = t + height/2
+    return center_x, center_y
+
+# Trouve la boite englobante d'une liste de points
+def get_boundings( liste_points ):
+    l,t,r,b = 0,0,0,0
+    for point in liste_points:
+        if ( point[0] < l ):
+            l = point[0]
+
+        if ( point[1] < t ):
+            t = point[1]
+
+        if ( point[0] > r ):
+            r = point[0]
+
+        if (point[1] > b ):
+            b = point[1]
+    return l,t,r,b
+
 cap = cv2.VideoCapture(0)
 while(cap.isOpened()):
     ret, img = cap.read()
@@ -9,18 +35,17 @@ while(cap.isOpened()):
     grey = cv2.cvtColor(crop_img, cv2.COLOR_BGR2GRAY)
     value = (35, 35)
     blurred = cv2.GaussianBlur(grey, value, 0)
-    _, thresh1 = cv2.threshold(blurred, 0, 255,
-                               cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+    _, thresh1 = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
     cv2.imshow('Thresholded', thresh1)
-    image, contours, hierarchy = cv2.findContours(thresh1.copy(),cv2.RETR_TREE, \
-            cv2.CHAIN_APPROX_NONE)
+    contours = cv2.findContours(thresh1.copy(),cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
     max_area = -1
     for i in range(len(contours)):
-        cnt=contours[i]
+        cnt=contours[i][0]
         area = cv2.contourArea(cnt)
         if(area>max_area):
             max_area=area
             ci=i
+
     cnt=contours[ci]
     x,y,w,h = cv2.boundingRect(cnt)
     cv2.rectangle(crop_img,(x,y),(x+w,y+h),(0,0,255),0)
